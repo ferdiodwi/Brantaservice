@@ -1,0 +1,83 @@
+name: brantaservice
+description: "Brantaservice - Manajemen Service HP"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Database Lokal
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  
+  # State Management
+  flutter_riverpod: ^2.4.9
+  
+  # Navigation
+  go_router: ^13.2.0
+  
+  # UI
+  flutter_svg: ^2.0.9
+  gap: ^3.0.1
+  google_fonts: ^6.1.0
+  fl_chart: ^0.66.0
+  cupertino_icons: ^1.0.8
+  
+  # Image Picker
+  image_picker: ^1.0.7
+  
+  # PDF
+  pdf: ^3.10.8
+  printing: ^5.12.0
+  
+  # Notifications
+  flutter_local_notifications: ^17.0.0
+  
+  # Utils
+  url_launcher: ^6.2.4
+  path_provider: ^2.1.2
+  permission_handler: ^11.3.0
+  intl: any
+  uuid: ^4.3.3
+  logger: ^2.0.2+1
+  flutter_localizations:
+    sdk: flutter
+  awesome_bottom_bar: ^1.2.4
+  workmanager: ^0.9.0+3
+  image_cropper: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.8
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.10
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+
+# Flutter Launcher Icons Configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#4A90E2"
+  adaptive_icon_foreground: "assets/icons/app_icon.png"
+
+# Flutter Native Splash Configuration
+flutter_native_splash:
+  color: "#F5F7FA"
+  image: "assets/icons/app_icon.png"
+  android_12:
+    color: "#F5F7FA"
+    icon_background_color: "#4A90E2"
