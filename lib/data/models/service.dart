@@ -152,6 +152,9 @@ class Service extends HiveObject {
   @HiveField(21)
   List<String>? usedParts; // List of inventory item IDs
   
+  @HiveField(22)
+  int? orderNumber; // Daily order number (001, 002, etc)
+  
   Service({
     required this.id,
     required this.customerId,
@@ -175,6 +178,7 @@ class Service extends HiveObject {
     this.warranty,
     this.notes,
     this.usedParts,
+    this.orderNumber,
   });
   
   /// Get status display text
@@ -223,6 +227,7 @@ class Service extends HiveObject {
     WarrantyConfig? warranty,
     String? notes,
     List<String>? usedParts,
+    int? orderNumber,
   }) {
     return Service(
       id: id ?? this.id,
@@ -247,6 +252,7 @@ class Service extends HiveObject {
       warranty: warranty ?? this.warranty,
       notes: notes ?? this.notes,
       usedParts: usedParts ?? this.usedParts,
+      orderNumber: orderNumber ?? this.orderNumber,
     );
   }
 }

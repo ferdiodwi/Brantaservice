@@ -134,6 +134,95 @@ class Formatters {
     }
     return imei;
   }
+  
+  /// Generate receipt/struk text for WhatsApp
+  /// Returns a formatted text suitable for sending via WhatsApp
+  static String generateReceipt({
+    required String shopName,
+    required String customerName,
+    required String customerPhone,
+    required String deviceBrand,
+    required String deviceModel,
+    required String problem,
+    required double estimatedCost,
+    double? finalCost,
+    required DateTime createdAt,
+    DateTime? completedAt,
+    String? notes,
+    int? warrantyDays, // Optional warranty in days
+    String? orderId, // Optional order ID
+  }) {
+    final cost = finalCost ?? estimatedCost;
+    final dateFormatLong = DateFormat('dd MMMM yyyy', 'id_ID');
+    final dateFormatShort = DateFormat('dd MMM yyyy', 'id_ID');
+    final timeFormat = DateFormat('HH:mm', 'id_ID');
+    
+    // Use provided order ID or generate default
+    final orderNumber = orderId ?? 'BS-${DateFormat('yyMMdd').format(createdAt)}-001';
+    
+    final buffer = StringBuffer();
+    
+    buffer.writeln('════════════════════════════');
+    buffer.writeln('        $shopName');
+    buffer.writeln('      Service & Repair HP');
+    buffer.writeln('════════════════════════════');
+    buffer.writeln('No. Order : $orderNumber');
+    buffer.writeln('Tanggal   : ${dateFormatLong.format(createdAt)}');
+    buffer.writeln('================================');
+    buffer.writeln('');
+    buffer.writeln('DATA PELANGGAN');
+    buffer.writeln('Nama      : $customerName');
+    buffer.writeln('No. HP    : ${_formatPhoneDisplay(customerPhone)}');
+    buffer.writeln('');
+    buffer.writeln('DATA PERANGKAT');
+    buffer.writeln('Perangkat : $deviceBrand $deviceModel');
+    buffer.writeln('');
+    buffer.writeln('DETAIL SERVIS');
+    buffer.writeln('Keluhan   :');
+    // Split problem by comma and display each on new line
+    final problems = problem.split(',').map((p) => p.trim()).where((p) => p.isNotEmpty);
+    for (final p in problems) {
+      buffer.writeln('- $p');
+    }
+    buffer.writeln('');
+    buffer.writeln('Biaya Servis: ${_currencyFormatter.format(cost)}');
+    buffer.writeln('--------------------------------');
+    buffer.writeln('Masuk     : ${dateFormatShort.format(createdAt)}');
+    if (completedAt != null) {
+      buffer.writeln('Selesai   : ${dateFormatShort.format(completedAt)} | ${timeFormat.format(completedAt)}');
+    }
+    buffer.writeln('================================');
+    // Only show warranty if provided
+    if (warrantyDays != null && warrantyDays > 0) {
+      buffer.writeln('Garansi Servis : $warrantyDays Hari');
+      buffer.writeln('');
+    }
+    buffer.writeln('Terima kasih atas kepercayaan Anda');
+    buffer.writeln('$shopName 🙏');
+    
+    return buffer.toString();
+  }
+  
+  /// Format phone for display (0812-3456-7890)
+  static String _formatPhoneDisplay(String phone) {
+    final cleaned = phone.replaceAll(RegExp(r'[^\d]'), '');
+    if (cleaned.length >= 10) {
+      return '${cleaned.substring(0, 4)}-${cleaned.substring(4, 8)}-${cleaned.substring(8)}';
+    }
+    return phone;
+  }
+  
+  /// Format phone number for WhatsApp (remove leading 0, add 62)
+  /// Example: 081234567890 -> 6281234567890
+  static String formatPhoneForWhatsApp(String phone) {
+    String cleaned = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleaned.startsWith('0')) {
+      cleaned = '62${cleaned.substring(1)}';
+    } else if (!cleaned.startsWith('62')) {
+      cleaned = '62$cleaned';
+    }
+    return cleaned;
+  }
 }
 
 /// TextInputFormatter untuk input angka dengan pemisah ribuan (titik)

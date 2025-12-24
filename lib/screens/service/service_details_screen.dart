@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gap/gap.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/constants/app_constants.dart';
 import '../../providers/service_provider.dart';
 import '../../data/models/service.dart';
 import '../../core/l10n/app_localizations.dart';
@@ -139,6 +141,18 @@ class ServiceDetailsScreen extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                           ),
                           child: Text(l10n.translate('detail_btn_update'), style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                        ),
+                      // Show Kirim Struk button for completed services
+                      if (service.status == ServiceStatus.completed)
+                        ElevatedButton.icon(
+                          onPressed: () => _sendReceiptToWhatsApp(context, service),
+                          icon: const Icon(Icons.send_rounded, size: 18),
+                          label: Text(l10n.translate('detail_btn_send_receipt')),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            foregroundColor: AppColors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
                         ),
                     ],
                   ),
@@ -287,6 +301,64 @@ class ServiceDetailsScreen extends ConsumerWidget {
       ),
       ),
     );
+  }
+  
+  Future<void> _sendReceiptToWhatsApp(BuildContext context, Service service) async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Generate order ID with daily number
+    final orderNum = service.orderNumber ?? 1;
+    final orderIdFormatted = 'BS-${service.createdAt.year.toString().substring(2)}${service.createdAt.month.toString().padLeft(2, '0')}${service.createdAt.day.toString().padLeft(2, '0')}-${orderNum.toString().padLeft(3, '0')}';
+    
+    // Generate receipt text
+    final receipt = Formatters.generateReceipt(
+      shopName: AppConstants.appName,
+      customerName: service.customerName,
+      customerPhone: service.customerPhone,
+      deviceBrand: service.deviceBrand,
+      deviceModel: service.deviceModel,
+      problem: service.problemDescription,
+      estimatedCost: service.estimatedCost,
+      finalCost: service.finalCost,
+      createdAt: service.createdAt,
+      completedAt: service.completedAt,
+      notes: service.notes,
+      warrantyDays: service.warranty?.durationDays,
+      orderId: orderIdFormatted,
+    );
+    
+    // Format phone number for WhatsApp
+    final phone = Formatters.formatPhoneForWhatsApp(service.customerPhone);
+    
+    // Encode message for URL
+    final encodedMessage = Uri.encodeComponent(receipt);
+    
+    // Create WhatsApp URL
+    final whatsappUrl = Uri.parse('https://wa.me/$phone?text=$encodedMessage');
+    
+    try {
+      if (await canLaunchUrl(whatsappUrl)) {
+        await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.translate('detail_error_whatsapp')),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.translate('detail_error_whatsapp')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
   
   void _showStatusSheet(BuildContext context, WidgetRef ref, Service service) {

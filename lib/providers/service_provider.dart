@@ -18,9 +18,25 @@ class ServiceNotifier extends StateNotifier<List<Service>> {
     state = List<Service>.from(services);
   }
   
-  /// Add new service
+  /// Add new service with auto-generated order number
   Future<void> addService(Service service) async {
-    await _box.put(service.id, service);
+    // Generate daily order number
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final todayEnd = todayStart.add(const Duration(days: 1));
+    
+    // Count services created today to get next order number
+    final todayServices = _box.values.where((s) => 
+      s.createdAt.isAfter(todayStart.subtract(const Duration(seconds: 1))) && 
+      s.createdAt.isBefore(todayEnd)
+    ).toList();
+    
+    final nextOrderNumber = todayServices.length + 1;
+    
+    // Create service with order number
+    final serviceWithOrder = service.copyWith(orderNumber: nextOrderNumber);
+    
+    await _box.put(serviceWithOrder.id, serviceWithOrder);
     _loadServices();
   }
   

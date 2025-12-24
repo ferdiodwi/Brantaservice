@@ -41,6 +41,10 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   final _estimatedCostController = TextEditingController();
   final _notesController = TextEditingController();
   
+  // Warranty selection (in days, 0 = no warranty)
+  int _warrantyDays = 0;
+  final List<int> _warrantyOptions = [0, 7, 14, 30, 60, 90];
+  
   // Existing customer
   Customer? _selectedCustomer;
   bool _isNewCustomer = true;
@@ -452,6 +456,29 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
           ),
           const Gap(16),
           
+          // Warranty Selection
+          DropdownButtonFormField<int>(
+            value: _warrantyDays,
+            decoration: InputDecoration(
+              labelText: l10n.translate('entry_field_warranty'),
+              prefixIcon: const Icon(Icons.shield_outlined),
+            ),
+            items: _warrantyOptions.map((days) {
+              return DropdownMenuItem<int>(
+                value: days,
+                child: Text(days == 0 
+                    ? l10n.translate('entry_warranty_none')
+                    : '$days ${l10n.translate('entry_warranty_days')}'),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _warrantyDays = value ?? 0;
+              });
+            },
+          ),
+          const Gap(16),
+          
           TextFormField(
             controller: _notesController,
             maxLines: 3,
@@ -700,6 +727,9 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
           : null,
       status: ServiceStatus.checkIn,
       createdAt: DateTime.now(),
+      warranty: _warrantyDays > 0 
+          ? WarrantyConfig(durationDays: _warrantyDays, startDate: DateTime.now())
+          : null,
     );
     
     await ref.read(serviceProvider.notifier).addService(service);

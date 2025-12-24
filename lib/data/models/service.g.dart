@@ -85,13 +85,14 @@ class ServiceAdapter extends TypeAdapter<Service> {
       warranty: fields[19] as WarrantyConfig?,
       notes: fields[20] as String?,
       usedParts: (fields[21] as List?)?.cast<String>(),
+      orderNumber: fields[22] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Service obj) {
     writer
-      ..writeByte(22)
+      ..writeByte(23)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -135,7 +136,9 @@ class ServiceAdapter extends TypeAdapter<Service> {
       ..writeByte(20)
       ..write(obj.notes)
       ..writeByte(21)
-      ..write(obj.usedParts);
+      ..write(obj.usedParts)
+      ..writeByte(22)
+      ..write(obj.orderNumber);
   }
 
   @override
